@@ -11,6 +11,12 @@ class GameObject {
   }
 
   updatePosition() {
+    // Friction
+    this.speed += DRAG_COEFF * this.speed;
+    if (this.speed < MIN_SPEED) {
+      this.speed = 0;
+    }
+
     let ds = [
       this.speed * Math.sin(this.direction),
       this.speed * Math.cos(this.direction),
@@ -19,11 +25,7 @@ class GameObject {
   }
 
   applyAcceleration(additional_acceleration) {
-    this.speed += DRAG_COEFF * this.speed;
     this.speed += additional_acceleration;
-    if (this.speed < MIN_SPEED) {
-      this.speed = 0;
-    }
   }
 
   circularCollision(obstacle) {
