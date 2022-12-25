@@ -1,4 +1,3 @@
-const FRICTION = 0.85;
 const MIN_SPEED = 0.5;
 
 class GameObject {
@@ -7,6 +6,14 @@ class GameObject {
     this.speed = speed;
     this.direction = direction;
     this.id = id;
+  }
+
+  static get DELTA_T() {
+    return 0.01;
+  }
+
+  static get FRICTION() {
+    return 0.85;
   }
 
   updatePosition() {
@@ -18,7 +25,7 @@ class GameObject {
   }
 
   brake() {
-    this.speed *= FRICTION;
+    this.speed *= this.FRICTION;
     if (this.speed < MIN_SPEED) {
       this.speed = 0;
     }

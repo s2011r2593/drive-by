@@ -1,11 +1,9 @@
 const GameObject = require('./game_object.js');
 const Bullet = require('./bullet.js');
 
-const MAX_SPEED = 15;
-const CUTOFF = 5;
-const H = CUTOFF - Math.log(Math.exp(CUTOFF) - 1);
-const K = - 1 / (Math.exp(CUTOFF) - 1);
-const C0 = CUTOFF / MAX_SPEED;
+const BASE_ACCEL = 10;
+const MAX_SPEED = 20;
+const DRAG_COEFF = BASE_ACCEL / MAX_SPEED;
 
 class Player extends GameObject {
   constructor(id, y, x) {
@@ -25,11 +23,11 @@ class Player extends GameObject {
   }
 
   speed_up() {
-    this.speed = this.speed + Math.exp(H - C0*this.speed) + K;
+    this.speed += this.DELTA_T * (BASE_ACCEL - DRAG_COEFF * this.speed);
   }
 
-  turn(dt) {
-    this.direction = (this.direction + dt) % (2 * Math.PI);
+  turn(d_theta) {
+    this.direction = (this.direction + d_theta) % (2 * Math.PI);
   }
 }
 
