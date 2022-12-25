@@ -38,7 +38,7 @@ socket.on("update", ({ observation, done, scores, info }) => {
       car.anchor.set(0.5);
       car.y = player.pos[0];
       car.x = player.pos[1];
-      car.scale.set(0.5, 0.5);
+      car.scale.set(0.3, 0.3);
       app.stage.addChild(car);
       cars.push(car);
     });
