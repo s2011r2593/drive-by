@@ -11,6 +11,7 @@ socket.on("confirm", _ => {
 
 let app = null;
 let cars = [];
+let shots = [];
 let gameStarted = false;
 let isInitialized = false;
 socket.on("update", ({ observation, done, scores, info }) => {
@@ -31,27 +32,49 @@ socket.on("update", ({ observation, done, scores, info }) => {
   }
 
   // Initialize players if just reset
-  let { players } = observation;
+  let { players, bullets } = observation;
+  console.log(bullets);
   if (players && cars.length === 0 && players.length > 0) {
     players.forEach(player => {
-      let car = PIXI.Sprite.from('assets/sprites/car.png');
+      let car = PIXI.Sprite.from("assets/sprites/car.png");
       car.anchor.set(0.5);
       car.y = player.pos[0];
       car.x = player.pos[1];
       car.scale.set(0.3, 0.3);
       app.stage.addChild(car);
       cars.push(car);
+
+      let bullet = PIXI.Sprite.from("assets/sprites/bullet.png");
+      bullet.anchor.set(0.5);
+      bullet.y = player.pos[0];
+      bullet.x = player.pos[1];
+      bullet.scale.set(0.5, 0.5);
+      // bullet.visible = false;
+      app.stage.addChild(bullet);
+
+      shots.push(bullet);
     });
   } else {
     for (c in cars) {
-      cars[c].y = observation.players[c].pos[0];
-      cars[c].x = observation.players[c].pos[1];
-      cars[c].rotation = observation.players[c].dir;
+      cars[c].y = players[c].pos[0];
+      cars[c].x = players[c].pos[1];
+      cars[c].rotation = players[c].dir;
+    }
+
+    for (b in shots) {
+      if (b < shots.length) {
+        if (!shots[b].visible) {
+          shots[b].visible = true;
+        }
+        shots[b].y = bullets[b].pos[0];
+        shots[b].x = bullets[b].pos[1];
+        shots[b].rotation = bullets[b].dir;
+      }
     }
   }
 });
 
-let action = [0, 0, 0, 0];
+let action = [0, 0, 0, 0, 0];
 window.onload = async () => {
   window.addEventListener("keydown", e => {
     if (e.code === "KeyL") {
@@ -67,6 +90,7 @@ window.onload = async () => {
       action[3] = 1;
     }
     if (e.code === "Space") {
+      action[4] = 1;
     }
   });
 
@@ -82,6 +106,9 @@ window.onload = async () => {
     }
     if (e.code === "KeyN") {
       action[3] = 0;
+    }
+    if (e.code === "Space") {
+      action[4] = 0;
     }
   });
 }

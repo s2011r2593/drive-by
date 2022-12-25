@@ -47,13 +47,6 @@ io.on("connection", socket => {
 
   socket.on("action", msg => {
     action = [msg];
-    // TODO: set action
-    /*
-    if (!pause) {
-      let { observation, done, scores, info } = env.step([]);
-      socket.emit("update", { observation, done, scores, info });
-    }
-    */
   });
   
   socket.on("pause", () => {
