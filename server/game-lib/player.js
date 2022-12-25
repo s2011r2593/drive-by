@@ -22,9 +22,9 @@ class Player extends GameObject {
     }
   }
 
-  speed_up() {
-    this.speed += this.DELTA_T * (BASE_ACCEL - DRAG_COEFF * this.speed);
-  }
+  // get speedUp() {
+  //   BASE_ACCEL - DRAG_COEFF * this.speed;
+  // }
 
   turn(d_theta) {
     this.direction = (this.direction + d_theta) % (2 * Math.PI);

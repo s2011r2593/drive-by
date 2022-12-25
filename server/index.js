@@ -6,6 +6,11 @@ const server = http.createServer(app);
 
 const Player = require('./game-lib/player.js');
 
+const CONFIG = {
+  width: 800,
+  height: 450,
+};
+
 class Environment {
   constructor(num_players) {
     this.players = new Array(num_players);
@@ -18,7 +23,7 @@ class Environment {
   reset() {
     for (let p in this.players) {
       let player = this.players[p];
-      player.setPosition([0, player.id]);
+      player.setPosition([Math.random() * CONFIG.width, Math.random() * CONFIG.height]);
     }
     return {
       observation: {
@@ -38,7 +43,9 @@ class Environment {
         }),
         */
       },
-      info: {}
+      info: {
+        ...CONFIG,
+      }
     }
   }
 

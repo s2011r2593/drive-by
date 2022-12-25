@@ -24,12 +24,16 @@ class GameObject {
     this.position = this.position.map((s, i) => s + ds[i]);
   }
 
-  brake() {
-    this.speed *= this.FRICTION;
-    if (this.speed < MIN_SPEED) {
-      this.speed = 0;
-    }
+  applyAcceleration(a) {
+    this.speed += a;
   }
+
+  // brake() {
+  //   this.speed *= this.FRICTION;
+  //   if (this.speed < MIN_SPEED) {
+  //     this.speed = 0;
+  //   }
+  // }
 }
 
 module.exports = GameObject;
