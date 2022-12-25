@@ -27,6 +27,10 @@ class Player extends GameObject {
     return BASE_ACCEL - DRAG_COEFF * this.speed;
   }
 
+  get NeutralAccel() {
+    return - DRAG_COEFF * this.speed;
+  }
+
   get BrakeAccel() {
     return BRAKE_COEFF * this.speed;
   }
