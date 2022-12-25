@@ -12,6 +12,7 @@ class Environment {
       this.players[i] = new Player(i, 0, 0);
     }
     this.bullets = [];
+    this.walls = [];
   }
 
   reset() {
@@ -21,6 +22,10 @@ class Environment {
         Math.random() * CONFIG.width,
       ]);
     });
+    this.walls.push([0, 0, CONFIG.height, 0]);
+    this.walls.push([0, CONFIG.width, CONFIG.height, CONFIG.width]);
+    this.walls.push([0, 0, 0, CONFIG.width]);
+    this.walls.push([CONFIG.height, 0, CONFIG.height, CONFIG.width]);
     return {
       observation: {
         players: this.players.map(player => {
@@ -29,6 +34,7 @@ class Environment {
             dir: player.direction,
           };
         }),
+        obstacles: this.walls,
         /*
         bullets: this.bullets.map(bullet => {
           return {

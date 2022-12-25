@@ -4,52 +4,60 @@ const MIN_SPEED = 0.5;
 class GameObject {
   constructor(position, speed, direction, id) {
     this.position = position;
+    this.projected;
     this.speed = speed;
     this.direction = direction;
     this.id = id;
     this.radius = 10;
   }
 
-  updatePosition() {
+  // walls: [ [y0, x0, y1, x1], ... ]
+  updatePosition(walls) {
+    let ds = [
+      this.speed * Math.sin(this.direction),
+      this.speed * Math.cos(this.direction),
+    ];
+    this.projected = this.position.map((s, i) => s + ds[i]);
+    let res = this.wallCollision(walls);
+    if (res) {
+      // Vertical
+      if (res[3] - res[1]) {
+        this.direction = Math.PI - this.direction;
+        this.direction %= Math.PI;
+        this.position = [-this.projected[0], this.projected[1]];
+      } else {
+        this.direction = -this.direction;
+        this.position = [this.projected[0], -this.projected[1]];
+      }
+    } else {
+      this.position = this.projected;
+    }
+
     // Friction
     this.speed += DRAG_COEFF * this.speed;
     if (this.speed < MIN_SPEED) {
       this.speed = 0;
     }
-
-    let ds = [
-      this.speed * Math.sin(this.direction),
-      this.speed * Math.cos(this.direction),
-    ];
-    this.position = this.position.map((s, i) => s + ds[i]);
   }
 
   applyAcceleration(additional_acceleration) {
     this.speed += additional_acceleration;
   }
 
-  circularCollision(obstacle) {
-    let min_sq_dist = Infinity;
-    let e;
-    let disps = [];
-    obstacle.vertices.forEach(v => {
-      let dy = v[0] - this.position[0];
-      let dx = v[1] - this.position[1];
-      disps.push([dy, dx]);
-      let sq_dist = dx*dx + dy*dy;
-      if (sq_dist < min_sq_dist) {
-        min_sq_dist = sq_dist;
-        inv_dist = 1 / Math.sqrt(sq_dist);
-        e = [dy * inv_dist, dx * inv_dist];
-      }
+  wallCollision(walls) {
+    const ccw = (a, b, c) => {
+      return (c[0] - a[0]) * (b[1] - a[1]) > (b[0] - a[0]) * (c[1] - a[1]);
+    }
+
+    let u0 = this.position;
+    let u1 = this.projected;
+    walls.forEach(wall => {
+      let v0 = wall.slice(0,2);
+      let v1 = wall.slice(2,4);
+
+      return (ccw(u0, v0, v1) != ccw(u1, v0, v1)) && (ccw(u0, u1, v0) != ccw(u0, u1, v1));
     });
-    let collide = false;
-    disps.forEach(d => {
-      let scalar_proj = d[0] * e[0] + d[1] * e[1];
-      if (scalar_proj < this.radius) {
-        return
-      }
-    })
+    return false;
   }
 }
 

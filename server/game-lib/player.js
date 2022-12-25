@@ -34,7 +34,7 @@ class Player extends GameObject {
   }
 
   turn(d_theta) {
-    this.direction = (this.direction + d_theta) % (2 * Math.PI);
+    this.direction = (this.direction + d_theta) % (Math.PI);
   }
 }
 
