@@ -9,7 +9,7 @@ class Bullet extends GameObject {
 
   updatePosition() {
     super.updatePosition();
-    super.brake();
+    super.applyAcceleration(-0.15 * this.speed);
   }
 }
 

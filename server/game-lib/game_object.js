@@ -8,32 +8,20 @@ class GameObject {
     this.id = id;
   }
 
-  static get DELTA_T() {
-    return 0.01;
-  }
-
-  static get FRICTION() {
-    return 0.85;
-  }
-
   updatePosition() {
     let ds = [
-      this.speed * Math.cos(this.direction),
       this.speed * Math.sin(this.direction),
+      this.speed * Math.cos(this.direction),
     ];
     this.position = this.position.map((s, i) => s + ds[i]);
   }
 
   applyAcceleration(a) {
     this.speed += a;
+    if (this.speed < 0) {
+      this.speed = 0;
+    }
   }
-
-  // brake() {
-  //   this.speed *= this.FRICTION;
-  //   if (this.speed < MIN_SPEED) {
-  //     this.speed = 0;
-  //   }
-  // }
 }
 
 module.exports = GameObject;

@@ -4,6 +4,7 @@ const Bullet = require('./bullet.js');
 const BASE_ACCEL = 10;
 const MAX_SPEED = 20;
 const DRAG_COEFF = BASE_ACCEL / MAX_SPEED;
+const BRAKE_COEFF = - DRAG_COEFF * 2
 
 class Player extends GameObject {
   constructor(id, y, x) {
@@ -22,9 +23,13 @@ class Player extends GameObject {
     }
   }
 
-  // get speedUp() {
-  //   BASE_ACCEL - DRAG_COEFF * this.speed;
-  // }
+  get GasAccel() {
+    return BASE_ACCEL - DRAG_COEFF * this.speed;
+  }
+
+  get BrakeAccel() {
+    return BRAKE_COEFF * this.speed;
+  }
 
   turn(d_theta) {
     this.direction = (this.direction + d_theta) % (2 * Math.PI);
