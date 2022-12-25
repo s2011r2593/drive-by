@@ -1,12 +1,6 @@
 const config = {
-  VIEW_SCALE: 0.8,
-}
-
-// PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
-let app = new PIXI.Application();
-app = new PIXI.Application({ width: window.innerWidth, height: window.innerHeight });
-app.stage.scale.set(1);
-document.body.appendChild(app.view);
+  ACTION_POLL_INTERVAL: 100,
+};
 
 const socket = io("ws://localhost:5000");
 
@@ -15,37 +9,62 @@ socket.on("confirm", _ => {
   socket.emit("reset", {});
 });
 
-socket.on("update", msg => {
-  console.log(msg);
+let app = null;
+let cars = [];
+let gameStarted = false;
+let isInitialized = false;
+socket.on("update", ({ observation, done, scores, info }) => {
+
+  // Handle PIXI initialization
+  if (!isInitialized) {
+    isInitialized = true;
+    app = new PIXI.Application({ width: info.width, height: info.height });
+    app.stage.scale.set(1);
+    document.body.appendChild(app.view);
+    actionTick();
+    
+    // Draw background
+    let bg = new PIXI.Graphics();
+    bg.beginFill(0x111111);
+    bg.drawRect(0, 0, info.width, info.height);
+    app.stage.addChild(bg);
+  }
+
+  // Initialize players if just reset
+  let { players } = observation;
+  if (players && cars.length === 0 && players.length > 0) {
+    players.forEach(player => {
+      let car = PIXI.Sprite.from('assets/sprites/car.png');
+      car.anchor.set(0.5);
+      car.y = player.pos[0];
+      car.x = player.pos[1];
+      car.scale.set(0.5, 0.5);
+      app.stage.addChild(car);
+      cars.push(car);
+    });
+  } else {
+    for (c in cars) {
+      cars[c].y = observation.players[c].pos[0];
+      cars[c].x = observation.players[c].pos[1];
+      cars[c].rotation = observation.players[c].dir;
+    }
+  }
 });
 
-let car;
-
+let action = [0, 0, 0, 0];
 window.onload = async () => {
-  app.renderer.background.color = "0xaaaabb";
-  let newWidth = config.VIEW_SCALE * window.innerWidth;
-  let newHeight = config.VIEW_SCALE * window.innerHeight;
-  app.renderer.view.style.width = `${newWidth}px`;
-  app.renderer.view.style.height = `${newHeight}px`;
-
-  car = PIXI.Sprite.from('assets/sprites/car.png');
-  car.anchor.set(0.5);
-  car.x = app.view.width / 2;
-  car.y = app.view.height / 2;
-  car.scale.set(0.5, 0.5);
-
   window.addEventListener("keydown", e => {
     if (e.code === "KeyL") {
-      env.arrowKeys[0] = 1;
-    }
-    if (e.code === "KeyS") {
-      env.arrowKeys[1] = 1;
+      action[0] = 1;
     }
     if (e.code === "KeyR") {
-      env.arrowKeys[2] = 1;
+      action[1] = 1;
+    }
+    if (e.code === "KeyS") {
+      action[2] = 1;
     }
     if (e.code === "KeyN") {
-      env.arrowKeys[3] = 1;
+      action[3] = 1;
     }
     if (e.code === "Space") {
     }
@@ -53,29 +72,21 @@ window.onload = async () => {
 
   window.addEventListener("keyup", e => {
     if (e.code === "KeyL") {
-      env.arrowKeys[0] = 0;
-    }
-    if (e.code === "KeyS") {
-      env.arrowKeys[1] = 0;
+      action[0] = 0;
     }
     if (e.code === "KeyR") {
-      env.arrowKeys[2] = 0;
+      action[1] = 0;
+    }
+    if (e.code === "KeyS") {
+      action[2] = 0;
     }
     if (e.code === "KeyN") {
-      env.arrowKeys[3] = 0;
+      action[3] = 0;
     }
   });
-
-  startGame();
 }
 
-// Start main game
-const startGame = () => {
-  app.stage.addChild(car);
-
-  app.ticker.add(update);
-}
-
-const update = delta => {
-  // car.y += 1;
+const actionTick = () => {
+  socket.emit("action", action);
+  setTimeout(actionTick, config.ACTION_POLL_INTERVAL);
 }

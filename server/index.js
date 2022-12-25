@@ -2,31 +2,39 @@ const express = require("express");
 const cors = require("cors");
 const app = express();
 const http = require("http");
-const server = http.createServer(app);
+const Environment = require("./game-lib/environment.js");
 
 // Server logic
 
+const server = http.createServer(app);
+app.use(cors());
 const io = require("socket.io")(server, {
   cors: {
     origin: "http://localhost:8080",
     methods: ["GET", "POST"],
   }
 });
-
 io.listen(5000);
 
-app.use(cors());
-
 let pause = false;
-let env = new Environment(1);
+let env = new Environment(4);
+let action = [];
+let sockets = [];
+
+let tick = () => {
+  let { observation, done, scores, info } = env.step(action);
+  sockets[0] && sockets[0].emit("update", { observation, done, scores, info });
+  setTimeout(() => tick(), 50);
+}
+tick();
 
 io.on("connection", socket => {
+  sockets = [socket];
   console.log("Client connected!");
   socket.emit("confirm", {});
   socket.emit("pause", pause);
 
   socket.on("reset", () => {
-    console.log("snt")
     let { observation, info } = env.reset();
     console.log("Game reset.");
     socket.emit("update", {
@@ -37,13 +45,15 @@ io.on("connection", socket => {
     });
   });
 
-  socket.on("step", () => {
-  
+  socket.on("action", msg => {
+    action = [msg];
     // TODO: set action
+    /*
     if (!pause) {
       let { observation, done, scores, info } = env.step([]);
       socket.emit("update", { observation, done, scores, info });
     }
+    */
   });
   
   socket.on("pause", () => {

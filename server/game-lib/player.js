@@ -11,6 +11,21 @@ class Player extends GameObject {
     this.position = position;
   }
 
+  act(action) {
+    if (action[0] == 1) {
+      this.applyAcceleration(5);
+    }
+    if (action[1] == 1) {
+      this.applyAcceleration(-0.5*this.speed);
+    }
+    if (action[2] == 1) {
+      this.turn(-0.1);
+    }
+    if (action[3] == 1) {
+      this.turn(0.1);
+    }
+  }
+
   fireBullet() {
     if (this.has_ammo) {
       this.has_ammo = false;

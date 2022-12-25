@@ -15,10 +15,12 @@ class Environment {
   }
 
   reset() {
-    for (let p in this.players) {
-      let player = this.players[p];
-      player.setPosition([Math.random() * CONFIG.width, Math.random() * CONFIG.height]);
-    }
+    this.players.forEach(player => {
+      player.setPosition([
+        Math.random() * CONFIG.height, 
+        Math.random() * CONFIG.width,
+      ]);
+    });
     return {
       observation: {
         players: this.players.map(player => {
@@ -44,8 +46,20 @@ class Environment {
   }
 
   step(action) {
+    for (let p in this.players) {
+      let player = this.players[p];
+      action[p] && player.act(action[p]);
+      player.updatePosition();
+    };
     return {
-      observation: {},
+      observation: {
+        players: this.players.map(player => {
+          return {
+            pos: player.position,
+            dir: player.direction,
+          };
+        }),
+      },
       scores: [0],
       done: false,
       info: {}
