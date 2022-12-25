@@ -1,12 +1,9 @@
 body {
+  margin: 0; 
   width: 100vw;
-  height: 90vh;
+  height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: black;
-}
-
-body > canvas {
-  border: 1px solid #ffffff55;
+  background: #232323;
 }

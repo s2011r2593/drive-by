@@ -8,8 +8,8 @@ const K = - 1 / (Math.exp(CUTOFF) - 1);
 const C0 = CUTOFF / MAX_SPEED;
 
 class Player extends GameObject {
-  constructor(id) {
-    super([0, 0], 0, 0, id);
+  constructor(id, y, x) {
+    super([y, x], 0, 0, id);
     this.has_ammo = true;
   }
 

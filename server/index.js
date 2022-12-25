@@ -10,27 +10,33 @@ class Environment {
   constructor(num_players) {
     this.players = new Array(num_players);
     for (let i = 0; i < num_players; i++) {
-      this.players[i] = new Player(i);
+      this.players[i] = new Player(i, 0, 0);
     }
     this.bullets = [];
   }
 
   reset() {
+    for (let p in this.players) {
+      let player = this.players[p];
+      player.setPosition([0, player.id]);
+    }
     return {
       observation: {
         players: this.players.map(player => {
           return {
-            position: player.position,
-            direction: player.direction,
+            pos: player.position,
+            dir: player.direction,
           };
         }),
+        /*
         bullets: this.bullets.map(bullet => {
           return {
-            position: bullet.position,
-            direction: bullet.direction,
+            pos: bullet.position,
+            dir: bullet.direction,
             owner: bullet.id,
           };
         }),
+        */
       },
       info: {}
     }
@@ -46,59 +52,58 @@ class Environment {
   }
 }
 
-let test = new Environment(4);
-test.bullets.push(test.players[0].fireBullet());
-test.players[0].updatePosition();
-console.log(test.reset().observation.players[0].position);
-
 // Server logic
 
 const io = require("socket.io")(server, {
   cors: {
-    origin: "http://localhost:8081",
+    origin: "http://localhost:8080",
     methods: ["GET", "POST"],
   }
 });
 
+io.listen(5000);
+
 app.use(cors());
 
 let pause = false;
-let env = Environment;
+let env = new Environment(1);
 
-io.on("init", socket => {
+io.on("connection", socket => {
+  console.log("Client connected!");
   socket.emit("confirm", {});
   socket.emit("pause", pause);
-});
 
-io.on("reset", socket => {
-  let { observation, info } = env.reset();
-
-  socket.emit("update", {
-    "observation": observation,
-    "done": false,
-    "scores": [],
-    "info": info,
+  socket.on("reset", () => {
+    console.log("snt")
+    let { observation, info } = env.reset();
+    console.log("Game reset.");
+    socket.emit("update", {
+      "observation": observation,
+      "done": false,
+      "scores": [],
+      "info": info,
+    });
   });
-});
 
-io.on("step", socket => {
+  socket.on("step", () => {
   
-  // TODO: set action
-  if (!pause) {
-    let { observation, done, scores, info } = env.step([]);
-    socket.emit("update", { observation, done, scores, info });
-  }
-});
-
-io.on("pause", socket => {
-  pause = !pause;
-  socket.emit("pause", pause);
+    // TODO: set action
+    if (!pause) {
+      let { observation, done, scores, info } = env.step([]);
+      socket.emit("update", { observation, done, scores, info });
+    }
+  });
+  
+  socket.on("pause", () => {
+    pause = !pause;
+    socket.emit("pause", pause);
+  });
 });
 
 app.get("/", (_, res) => {
   res.send("Server is running . . .");
 });
 
-server.listen(5000, () => {
+server.listen(3000, () => {
   console.log("Web server started . . .");
 });
