@@ -4,26 +4,52 @@ const app = express();
 const http = require("http");
 const server = http.createServer(app);
 
-class NullEnv {
-  constructor() {
+const Player = require('./game-lib/player.js');
+
+class Environment {
+  constructor(num_players) {
+    this.players = new Array(num_players);
+    for (let i = 0; i < num_players; i++) {
+      this.players[i] = new Player(i);
+    }
+    this.bullets = [];
   }
 
-  rese() {
+  reset() {
     return {
-      observation: {},
-      info: {},
+      observation: {
+        players: this.players.map(player => {
+          return {
+            position: player.position,
+            direction: player.direction,
+          };
+        }),
+        bullets: this.bullets.map(bullet => {
+          return {
+            position: bullet.position,
+            direction: bullet.direction,
+            owner: bullet.id,
+          };
+        }),
+      },
+      info: {}
     }
   }
 
   step(action) {
     return {
       observation: {},
+      scores: [0],
       done: false,
-      scores: [],
-      info: {},
+      info: {}
     }
   }
 }
+
+let test = new Environment(4);
+test.bullets.push(test.players[0].fireBullet());
+test.players[0].updatePosition();
+console.log(test.reset().observation.players[0].position);
 
 // Server logic
 
@@ -37,7 +63,7 @@ const io = require("socket.io")(server, {
 app.use(cors());
 
 let pause = false;
-let env = NullEnv;
+let env = Environment;
 
 io.on("init", socket => {
   socket.emit("confirm", {});
