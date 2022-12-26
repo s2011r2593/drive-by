@@ -1,4 +1,4 @@
-const DRAG_COEFF = -0.6
+const DRAG_COEFF = -0.05
 const MIN_SPEED = 0.5;
 
 class GameObject {

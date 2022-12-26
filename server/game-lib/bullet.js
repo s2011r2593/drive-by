@@ -1,6 +1,6 @@
 const GameObject = require('./game_object.js');
 
-const ADDITIONAL_SPEED = 10;
+const ADDITIONAL_SPEED = 100;
 
 class Bullet extends GameObject {
   constructor(position, ref_speed, direction, id) {

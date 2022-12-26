@@ -1,4 +1,5 @@
 const Player = require('./player.js');
+const Bullet = require('./bullet.js');
 
 const CONFIG = {
   width: 800,
@@ -43,7 +44,6 @@ class Environment {
             owner: bullet.id,
           };
         }),
-        */
       },
       info: {
         ...CONFIG,
@@ -54,15 +54,26 @@ class Environment {
   step(action) {
     for (let p in this.players) {
       let player = this.players[p];
-      action[p] && player.act(action[p]);
+      action[p] && player.act(action[p], this.bullets);
       player.updatePosition();
     };
+    for (let b in this.bullets) {
+      let bullet = this.bullets[b];
+      bullet.updatePosition();
+    }
     return {
       observation: {
         players: this.players.map(player => {
           return {
             pos: player.position,
             dir: player.direction,
+          };
+        }),
+        bullets: this.bullets.map(bullet => {
+          return {
+            pos: bullet.position,
+            dir: bullet.direction,
+            owner: bullet.id,
           };
         }),
       },
